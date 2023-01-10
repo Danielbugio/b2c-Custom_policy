@@ -1,0 +1,570 @@
+<TrustFrameworkPolicy
+   xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" 
+   xmlns:xsd="https://www.w3.org/2001/XMLSchema" 
+   xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" 
+   PolicySchemaVersion="0.3.0.0" 
+   TenantId="lusitaniab2csitesdev.onmicrosoft.com" 
+   PolicyId="B2C_1A_CLIENTSIGNUP" 
+   PublicPolicyUri="http://lusitaniab2csitesdev.onmicrosoft.com/CLIENTSIGNUP" 
+   TenantObjectId="65ae6c18-5181-4fac-b958-104865fde70d">
+  <BasePolicy>
+    <TenantId>lusitaniab2csitesdev.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkExtensions</PolicyId>
+  </BasePolicy>
+  <BuildingBlocks>
+    <!-- Declarações de Claims -->
+    <ClaimsSchema>
+      <!-- objectId requisito para a policy -->
+      <ClaimType Id="objectId">
+        <DataType>string</DataType>
+      </ClaimType>
+      <!-- extension_docId representa o Nº do Documento solicitado ao utilizador -->
+      <ClaimType Id="docId">
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="extension_docId">
+        <DisplayName>NIF ou Nº do Cliente ou Nº da Apólice</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>informe o Número de Contribuinte ou Nº do Cliente ou Nº Apólice.</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <!-- extension_nif representa o Nº do Documento solicitado ao utilizador -->
+      <ClaimType Id="nif">
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="extension_nif">
+        <DisplayName>Nº Identificação Fiscal</DisplayName>
+        <DataType>string</DataType>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <!-- extension_pclient representa o Nº do Documento solicitado ao utilizador -->
+      <ClaimType Id="pcliente">
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="extension_pclient">
+        <DisplayName>Nº Cliente</DisplayName>
+        <DataType>string</DataType>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <!-- extension_cellPhone é o número do telemóvel retornado da API -->
+      <ClaimType Id="extension_cellPhone">
+        <DisplayName>Nº do Telemóvel</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Informe o número do telemóvel</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <!-- extension_cellPhone é o número do telemóvel retornado da API -->
+      <ClaimType Id="cellPhone">
+        <DisplayName>Nº do Telemóvel</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Informe o número do telemóvel</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <!-- cellPhoneMask com mascara para apresentar-->
+      <ClaimType Id="cellPhoneMask">
+        <DisplayName>Nº do Telemóvel</DisplayName>
+        <DataType>string</DataType>
+        <Mask Type="Simple">XXXXXXXXXX </Mask>
+        <UserHelpText>Informe o número do telemóvel</UserHelpText>
+        <UserInputType>Readonly</UserInputType>
+      </ClaimType>
+      <!-- email está declarado no Base -->
+      <!-- email com mascara para apresentar -->
+      <ClaimType Id="emailMask">
+        <DisplayName>Email</DisplayName>
+        <DataType>string</DataType>
+        <Mask Type="Regex" Regex="(?&lt;=.).(?=.*@)">*</Mask>
+        <UserInputType>Readonly</UserInputType>
+      </ClaimType>
+    </ClaimsSchema>
+    <!-- Transformações de Claims -->
+    <ClaimsTransformations>
+      <!-- Gera objectId aleatório. Utilizado pela Claim RandomObjectIdClaimGenerator chamada no Step 1 do Jorney  -->
+      <ClaimsTransformation Id="GenerateObjectIdTransformation" TransformationMethod="CreateRandomString">
+        <InputParameters>
+          <InputParameter Id="randomGeneratorType" DataType="string" Value="GUID" />
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="objectId" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <!-- Copia o phoneNumber para a phoneNumberMask -->
+      <ClaimsTransformation Id="CopyPhoneNumber" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="cellPhone" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="cellPhoneMask" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+         <!-- Copia o phoneNumber para a extension_cellPhone -->
+      <ClaimsTransformation Id="CopyCellPhone" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="cellPhone" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="extension_cellPhone" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+       <!-- Copia o pcliente para a extension_pclient -->
+      <ClaimsTransformation Id="CopyPclient" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="pcliente" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="extension_pclient" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+         <!-- Copia o nif para a extension_nif-->
+      <ClaimsTransformation Id="CopyNif" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="nif" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="extension_nif" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+         <!-- Copia o docId para a extension_docId-->
+      <ClaimsTransformation Id="CopyDocId" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="docId" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="extension_docId" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <!-- Copia email para o emailMask -->
+      <ClaimsTransformation Id="CopyEmail" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="email" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="emailMask" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <!-- Atribui o userPrincipalName (requisito obrigatório) com valor do email-->
+      <ClaimsTransformation Id="UPN" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="email" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="userPrincipalName" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+    </ClaimsTransformations>
+    <!-- Definições dos Layouts dos TechnicalProfiles -->
+    <ContentDefinitions>
+      <ContentDefinition Id="SelfAssertedContentDefinition">
+        <LoadUri>https://lsstcb2csitesneblob01.blob.core.windows.net/bc2-templates/lusitania/selfAsserted.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.1.7</DataUri>
+        <Metadata>
+          <Item Key="ui.header">Criar uma nova conta</Item>
+          <!-- Add the title text -->
+          <Item Key="ui.footer">~/tenant/selfAsserted/footer</Item>
+        </Metadata>
+      </ContentDefinition>
+    </ContentDefinitions>
+    <!-- Componentes compostos para TechnicalProfiles -->
+    <DisplayControls>
+      <!-- Bloco de email e botões para verificação do email -->
+      <DisplayControl Id="emailVerificationControl" UserInterfaceControlType="VerificationControl">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="emailMask" Required="true" />
+        </InputClaims>
+        <DisplayClaims>
+          <DisplayClaim ClaimTypeReferenceId="emailMask" Required="true" />
+          <DisplayClaim ClaimTypeReferenceId="verificationCode" ControlClaimType="VerificationCode" Required="true" />
+        </DisplayClaims>
+        <OutputClaims></OutputClaims>
+        <Actions>
+          <Action Id="SendCode">
+            <ValidationClaimsExchange>
+              <ValidationClaimsExchangeTechnicalProfile TechnicalProfileReferenceId="AadSspr-SendCode" />
+            </ValidationClaimsExchange>
+          </Action>
+          <Action Id="VerifyCode">
+            <ValidationClaimsExchange>
+              <ValidationClaimsExchangeTechnicalProfile TechnicalProfileReferenceId="AadSspr-VerifyCode" />
+            </ValidationClaimsExchange>
+          </Action>
+        </Actions>
+      </DisplayControl>
+      <!-- Bloco com phone e botões para verificação do phoneNumber -->
+      <DisplayControl Id="phoneVerificationControl" UserInterfaceControlType="VerificationControl">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="cellPhoneMask" Required="true" />
+        </InputClaims>
+        <DisplayClaims>
+          <DisplayClaim ClaimTypeReferenceId="cellPhoneMask" Required="true" />
+          <DisplayClaim ClaimTypeReferenceId="verificationCode" ControlClaimType="VerificationCode" Required="true" />
+        </DisplayClaims>
+        <OutputClaims></OutputClaims>
+        <Actions>
+          <Action Id="SendCode">
+            <ValidationClaimsExchange>
+              <ValidationClaimsExchangeTechnicalProfile TechnicalProfileReferenceId="AzureMfa-SendSms" />
+            </ValidationClaimsExchange>
+          </Action>
+          <Action Id="VerifyCode">
+            <ValidationClaimsExchange>
+              <ValidationClaimsExchangeTechnicalProfile TechnicalProfileReferenceId="AzureMfa-VerifySms" />
+            </ValidationClaimsExchange>
+          </Action>
+        </Actions>
+      </DisplayControl>
+    </DisplayControls>
+  </BuildingBlocks>
+  <!-- Provedores de Informações -->
+  <ClaimsProviders>
+    <!-- Gera o ObjectId aleatório para uso de registo no AD. Step 1 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>Claim Generator Technical Profiles</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="RandomObjectIdClaimGenerator">
+          <DisplayName>Random Object ID Claim Generator Technical Profile</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ClaimsTransformationProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="ContentDefinitionReferenceId">SelfAssertedContentDefinition</Item>
+          </Metadata>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="GenerateObjectIdTransformation" />
+          </OutputClaimsTransformations>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Obtem o extension_docId informado pelo utilizador. Step 2 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>User Input Collection Technical Profiles</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="UserInformationCollector">
+          <DisplayName>Collect User Input Technical Profile</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="ContentDefinitionReferenceId">SelfAssertedContentDefinition</Item>
+          </Metadata>
+          <DisplayClaims>
+            <DisplayClaim ClaimTypeReferenceId="extension_docId" Required="true" />
+          </DisplayClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="extension_docId" />
+            <OutputClaim ClaimTypeReferenceId="email" />
+            <OutputClaim ClaimTypeReferenceId="emailMask" />
+            <OutputClaim ClaimTypeReferenceId="extension_cellPhone" />
+            <OutputClaim ClaimTypeReferenceId="cellPhoneMask" />
+            <OutputClaim ClaimTypeReferenceId="extension_nif" />
+            <OutputClaim ClaimTypeReferenceId="extension_pclient" />
+          </OutputClaims>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!--Recuperação de Dados na API a partir do extension_docId informado pelo utilizador. Utilizado. step 3 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>Policy Engine TechnicalProfiles</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="ClientIdentification">
+          <DisplayName>Collect Company Domains Technical Profile</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="ServiceUrl">https://apim-dev-rjd.azure-api.net/func-dev-rjd/FunValidateClient </Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AuthenticationType">ApiKeyHeader</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="Ocp-Apim-Subscription-Key" StorageReferenceId="B2C_1A_APIKey" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="extension_docId" PartnerClaimType="docId"/>
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name"/>
+            <OutputClaim ClaimTypeReferenceId="pcliente" />
+            <OutputClaim ClaimTypeReferenceId="nif" />
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="docId" />
+            <OutputClaim ClaimTypeReferenceId="email" />
+            <OutputClaim ClaimTypeReferenceId="emailMask" />
+            <OutputClaim ClaimTypeReferenceId="cellPhone" />
+            <OutputClaim ClaimTypeReferenceId="cellPhoneMask" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CopyPclient" />
+            <OutputClaimsTransformation ReferenceId="CopyNif" />
+            <OutputClaimsTransformation ReferenceId="CopyCellPhone" />
+            <OutputClaimsTransformation ReferenceId="CopyDocId" />
+            <OutputClaimsTransformation ReferenceId="CopyEmail" />
+            <OutputClaimsTransformation ReferenceId="CopyPhoneNumber" />
+          </OutputClaimsTransformations>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Solicita confirmação do email e do telemóvel. Step 4 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>User Input Collection Technical Profiles</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="UserDataConfirmation">
+          <DisplayName>Collect User Input Technical Profile</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="ContentDefinitionReferenceId">SelfAssertedContentDefinition</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="extension_docId" Required="true" />
+            <InputClaim ClaimTypeReferenceId="emailMask" Required="true" />
+            <InputClaim ClaimTypeReferenceId="cellPhoneMask" Required="true" />
+          </InputClaims>
+          <DisplayClaims>
+            <DisplayClaim ClaimTypeReferenceId="emailMask" />
+            <DisplayClaim ClaimTypeReferenceId="cellPhoneMask" />
+          </DisplayClaims>
+          <PersistedClaims>
+            <PersistedClaim ClaimTypeReferenceId="email" />
+            <PersistedClaim ClaimTypeReferenceId="extension_cellPhone" />
+          </PersistedClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="extension_docId" />
+            <OutputClaim ClaimTypeReferenceId="email" />
+            <OutputClaim ClaimTypeReferenceId="emailMask" />
+            <OutputClaim ClaimTypeReferenceId="extension_cellPhone" />
+            <OutputClaim ClaimTypeReferenceId="cellPhoneMask" />
+            <OutputClaim ClaimTypeReferenceId="extension_nif" />
+            <OutputClaim ClaimTypeReferenceId="extension_pclient" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="UPN" />
+          </OutputClaimsTransformations>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Regista o utilizador no AD após validações. Step 5 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>Local Account</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="LocalAccountSignUpWithLogonEmail">
+          <DisplayName>Email signup</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IpAddressClaimReferenceId">IpAddress</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignup</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="issuer_secret" StorageReferenceId="B2C_1A_TokenSigningKeyContainer" />
+          </CryptographicKeys>
+          <DisplayClaims>
+            <DisplayClaim DisplayControlReferenceId="emailVerificationControl" />
+            <DisplayClaim DisplayControlReferenceId="phoneVerificationControl" />
+          </DisplayClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="extension_docId" />
+            <OutputClaim ClaimTypeReferenceId="email" />
+            <OutputClaim ClaimTypeReferenceId="emailMask" />
+            <OutputClaim ClaimTypeReferenceId="extension_cellPhone" />
+            <OutputClaim ClaimTypeReferenceId="cellPhoneMask" />
+            <OutputClaim ClaimTypeReferenceId="extension_nif" />
+            <OutputClaim ClaimTypeReferenceId="extension_pclient" />
+            <OutputClaim ClaimTypeReferenceId="newPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="reenterPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="executed-SelfAsserted-Input" DefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" />
+            <OutputClaim ClaimTypeReferenceId="newUser" />
+          </OutputClaims>
+          <ValidationTechnicalProfiles>
+            <ValidationTechnicalProfile ReferenceId="AAD-UserWriteUsingLogonEmail" />
+          </ValidationTechnicalProfiles>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Envia e Verifica Código Email. Compose Setp 5 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>Send and verify email code</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="AadSspr-SendCode">
+          <DisplayName>Send Email Code</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.AadSsprProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="Operation">SendCode</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="userPrincipalName" />
+            <InputClaim ClaimTypeReferenceId="email"  PartnerClaimType="emailAddress" />
+          </InputClaims>
+        </TechnicalProfile>
+        <TechnicalProfile Id="AadSspr-VerifyCode">
+          <DisplayName>Verify Email Code</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.AadSsprProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="Operation">VerifyCode</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="emailAddress" />
+            <InputClaim ClaimTypeReferenceId="verificationCode" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Envia e Verifica Código SMS. Compose Setp 5 do Jorney -->
+    <ClaimsProvider>
+      <DisplayName>Send and verify SMS code</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="AzureMfa-SendSms">
+          <DisplayName>Send SMS Code</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.AzureMfaProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="Operation">OneWaySMS</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="userPrincipalName" />
+            <InputClaim ClaimTypeReferenceId="cellPhoneMask" PartnerClaimType="phoneNumber" />
+          </InputClaims>
+        </TechnicalProfile>
+        <TechnicalProfile Id="AzureMfa-VerifySms">
+          <DisplayName>Verify SMS Code</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.AzureMfaProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="Operation">Verify</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="cellPhoneMask" PartnerClaimType="phoneNumber" />
+            <InputClaim ClaimTypeReferenceId="verificationCode" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Provê o token JWT utilizado. Step 7 do Jorney  -->
+    <ClaimsProvider>
+      <DisplayName>Token Issuer Technical Profiles</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="JwtIssuer">
+          <DisplayName>JWT Issuer</DisplayName>
+          <Protocol Name="None" />
+          <OutputTokenFormat>JWT</OutputTokenFormat>
+          <Metadata>
+            <Item Key="client_id">{service:te}</Item>
+            <Item Key="issuer_refresh_token_user_identity_claim_type">objectId</Item>
+            <Item Key="SendTokenResponseBodyWithJsonNumbers">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="issuer_secret" StorageReferenceId="B2C_1A_TokenSigningKeyContainer" />
+            <Key Id="issuer_refresh_token_key" StorageReferenceId="B2C_1A_TokenEncryptionKeyContainer" />
+          </CryptographicKeys>
+          <InputClaims />
+          <OutputClaims />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+    <!-- Technical profiles for local accounts -->
+    <ClaimsProvider>
+      <DisplayName>Azure Active Directory</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="AAD-UserWriteUsingLogonEmail">
+          <Metadata>
+            <Item Key="Operation">Write</Item>
+            <Item Key="RaiseErrorIfClaimsPrincipalAlreadyExists">true</Item>
+            <Item Key="ApplicationObjectId">29296472-cbf8-49f6-a5b0-2a63a03047a5</Item>
+            <Item Key="ClientId">c15f6c67-6c39-487e-8c55-3cd324dd6d54</Item>
+          </Metadata>
+          <IncludeInSso>false</IncludeInSso>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="signInNames.emailAddress" Required="true" />
+            <InputClaim ClaimTypeReferenceId="objectId" />
+            <!-- <InputClaim ClaimTypeReferenceId="newPassword" /> -->
+       
+
+          </InputClaims>
+          <PersistedClaims>
+            <!-- Required claims -->
+            <PersistedClaim ClaimTypeReferenceId="email" PartnerClaimType="signInNames.emailAddress" />
+            
+            <PersistedClaim ClaimTypeReferenceId="newPassword" PartnerClaimType="password" />
+            <PersistedClaim ClaimTypeReferenceId="displayName" DefaultValue="unknown" />
+            <PersistedClaim ClaimTypeReferenceId="passwordPolicies" DefaultValue="DisablePasswordExpiration" />
+            <PersistedClaim ClaimTypeReferenceId="extension_docId" />
+            <PersistedClaim ClaimTypeReferenceId="extension_nif" />
+            <PersistedClaim ClaimTypeReferenceId="extension_pclient" />
+          </PersistedClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="newUser" PartnerClaimType="newClaimsPrincipalCreated" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" DefaultValue="localAccountAuthentication" />
+            <OutputClaim ClaimTypeReferenceId="userPrincipalName" />
+            <OutputClaim ClaimTypeReferenceId="signInNames.emailAddress" />
+          </OutputClaims>
+          <IncludeTechnicalProfile ReferenceId="AAD-Common" />
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+  <UserJourneys>
+    <UserJourney Id="ClientSignupJourney">
+      <OrchestrationSteps>
+        <!-- Gera o ObjectId aleatório para uso de registo no AD -->
+        <OrchestrationStep Order="1" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetObjectIdClaimsExchange" TechnicalProfileReferenceId="RandomObjectIdClaimGenerator" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <!-- Solicita o Nº do Documento o Utilizador  -->
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="ObterNumDocumento" TechnicalProfileReferenceId="UserInformationCollector" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <!-- Recupera da API os dados com base no Nº do Documento informadno anteriormente -->
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetMessageClaimsExchange" TechnicalProfileReferenceId="ClientIdentification" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <!-- Solicita confirmação dos dados retornados na API -->
+        <OrchestrationStep Order="4" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="GetUserInformationClaimsExchange" TechnicalProfileReferenceId="UserDataConfirmation" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <!-- Solicita Confirmação do Email e Telemóvel, preenchimento da password e regista utilizador -->
+        <OrchestrationStep Order="5" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SignUpWithLogonEmailExchange" TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <!-- Recupera os dados do utilizador registado no AD -->
+        <OrchestrationStep Order="6" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="AADUserReadWithObjectId" TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <!-- Retorna Token para o app chamador -->
+        <OrchestrationStep Order="7" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+      </OrchestrationSteps>
+    </UserJourney>
+  </UserJourneys>
+  <RelyingParty>
+    <DefaultUserJourney ReferenceId="ClientSignupJourney" />
+    <TechnicalProfile Id="ClientSignupPolicyProfile">
+      <DisplayName>Client SignUp Policy Profile</DisplayName>
+      <Protocol Name="OpenIdConnect" />
+      <OutputClaims>
+        <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub" />
+        <OutputClaim ClaimTypeReferenceId="objectId" />
+        <OutputClaim ClaimTypeReferenceId="extension_docId" PartnerClaimType="extension_docId" />
+        <OutputClaim ClaimTypeReferenceId="email" />
+        <OutputClaim ClaimTypeReferenceId="extension_cellPhone" PartnerClaimType="extension_cellPhone" />
+        <OutputClaim ClaimTypeReferenceId="extension_nif" PartnerClaimType="extension_nif" />
+        <OutputClaim ClaimTypeReferenceId="extension_pclient" PartnerClaimType="extension_pclient" />
+        <OutputClaim ClaimTypeReferenceId="displayName" />
+      </OutputClaims>
+      <SubjectNamingInfo ClaimType="sub" />
+    </TechnicalProfile>
+  </RelyingParty>
+</TrustFrameworkPolicy>
